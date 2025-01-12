@@ -17,9 +17,13 @@ function App() {
     }
   };
 
-  const onToggle = () => {};
+  const onToggle = todoId => {
+    send({ type: 'TOGGLE_TODO', id: todoId });
+  };
 
-  const onDelete = () => {};
+  const onDelete = todoId => {
+    send({ type: 'DELETE_TODO', id: todoId });
+  };
 
   return (
     <>

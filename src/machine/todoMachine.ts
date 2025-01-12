@@ -29,6 +29,12 @@ export const todoMachine = createMachine<Context, Event>(
         on: {
           ADD_TODO: {
             actions: ['addTodo']
+          },
+          TOGGLE_TODO: {
+            actions: ['toggleTodo']
+          },
+          DELETE_TODO: {
+            actions: ['deleteTodo']
           }
         }
       }
@@ -41,6 +47,13 @@ export const todoMachine = createMachine<Context, Event>(
           ...context.todos,
           { id: new Date().getTime(), text: event.text, completed: false }
         ]
+      }),
+      toggleTodo: assign({
+        todos: ({ context, event }) =>
+          context.todos.map(todo => (todo.id === event.id ? { ...todo, completed: !todo.completed } : todo))
+      }),
+      deleteTodo: assign({
+        todos: ({ context, event }) => context.todos.filter(todo => todo.id !== event.id)
       })
     }
   }
