@@ -17,6 +17,10 @@ function App() {
     }
   };
 
+  const onToggle = () => {};
+
+  const onDelete = () => {};
+
   return (
     <>
       <Navigation />
@@ -25,6 +29,15 @@ function App() {
         <input type="text" value={text} onChange={e => setText(e.target.value)} placeholder="Add a todo" />
         <button onClick={handleAdd}>Add</button>
       </div>
+
+      <ul>
+        {state.context.todos.map(todo => (
+          <li key={todo.id} style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
+            <span onClick={() => onToggle(todo.id)}>{todo.text}</span>
+            <button onClick={() => onDelete(todo.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
 
       <h2>API End Point: {JSON.stringify(import.meta.env.VITE_APP_API_URL)}</h2>
       <Logo />
