@@ -1,60 +1,63 @@
-import { createMachine, assign } from 'xstate';
+import { fromPromise, assign, setup } from 'xstate';
 
-interface Todo {
-  id: number;
-  text: string;
-  completed: boolean;
-}
-
-interface Context {
-  todos: Todo[];
-}
-
-interface AddTodoEvent {
-  type: 'ADD_TODO';
-  text: string;
-}
-
-type Event = AddTodoEvent;
-
-export const todoMachine = createMachine<Context, Event>(
-  {
-    id: 'todo',
-    initial: 'idle',
-    context: {
-      todos: []
+export const todoMachine = setup({
+  types: {
+    context: {} as {
+      todos: [];
+      error: null;
+    }
+  },
+  actors: {
+    fetchUser: fromPromise(async () => {
+      const response = await fetch('http://localhost:3000/todos');
+      if (!response.ok) throw new Error('Failed to fetch todos');
+      return response.json();
+    })
+  }
+}).createMachine({
+  id: 'todos',
+  initial: 'loading',
+  context: {
+    todos: [],
+    error: null
+  },
+  states: {
+    idle: {
+      on: {
+        ADD_TODO: {
+          actions: ['addTodo']
+        },
+        TOGGLE_TODO: {
+          actions: ['toggleTodo']
+        },
+        DELETE_TODO: {
+          actions: ['deleteTodo']
+        }
+      }
     },
-    states: {
-      idle: {
-        on: {
-          ADD_TODO: {
-            actions: ['addTodo']
-          },
-          TOGGLE_TODO: {
-            actions: ['toggleTodo']
-          },
-          DELETE_TODO: {
-            actions: ['deleteTodo']
-          }
+    error: {
+      on: {
+        RETRY: 'loading'
+      }
+    },
+    loading: {
+      invoke: {
+        src: 'fetchUser',
+        onDone: {
+          target: 'idle',
+          actions: assign({
+            todos: data => {
+              return data.event.output;
+            }
+          })
+        },
+        onError: {
+          target: 'error',
+          actions: assign({
+            error: (_, event) => event.data
+          })
         }
       }
     }
-  },
-  {
-    actions: {
-      addTodo: assign({
-        todos: ({ context, event }) => [
-          ...context.todos,
-          { id: new Date().getTime(), text: event.text, completed: false }
-        ]
-      }),
-      toggleTodo: assign({
-        todos: ({ context, event }) =>
-          context.todos.map(todo => (todo.id === event.id ? { ...todo, completed: !todo.completed } : todo))
-      }),
-      deleteTodo: assign({
-        todos: ({ context, event }) => context.todos.filter(todo => todo.id !== event.id)
-      })
-    }
   }
-);
+});

@@ -25,9 +25,13 @@ function App() {
     send({ type: 'DELETE_TODO', id: todoId });
   };
 
+  if (state.value === 'loading') return <p>Loading... {JSON.stringify(state.context.todos)}</p>;
+  if (state.value === 'error') return <p>Error: {state.context.error}</p>;
+
   return (
     <>
       <Navigation />
+
       {JSON.stringify(state.context.todos)}
       <div>
         <input type="text" value={text} onChange={e => setText(e.target.value)} placeholder="Add a todo" />
