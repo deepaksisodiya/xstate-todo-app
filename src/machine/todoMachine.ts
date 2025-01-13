@@ -12,11 +12,20 @@ export const todoMachine = setup({
       const response = await fetch('http://localhost:3000/todos');
       if (!response.ok) throw new Error('Failed to fetch todos');
       return response.json();
+    }),
+    addTodo: fromPromise(async event => {
+      const response = await fetch('http://localhost:3000/todos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: event.input, completed: false }) // Use event.input instead of event.text
+      });
+      if (!response.ok) throw new Error('Failed to add todo');
+      return response.json();
     })
   }
 }).createMachine({
   id: 'todos',
-  initial: 'loading',
+  initial: 'fetchUserLoading',
   context: {
     todos: [],
     error: null
@@ -24,8 +33,8 @@ export const todoMachine = setup({
   states: {
     idle: {
       on: {
-        ADD_TODO: {
-          actions: ['addTodo']
+        ADD: {
+          target: 'addingTodo'
         },
         TOGGLE_TODO: {
           actions: ['toggleTodo']
@@ -37,10 +46,10 @@ export const todoMachine = setup({
     },
     error: {
       on: {
-        RETRY: 'loading'
+        RETRY: 'fetchUserLoading'
       }
     },
-    loading: {
+    fetchUserLoading: {
       invoke: {
         src: 'fetchUser',
         onDone: {
@@ -56,6 +65,15 @@ export const todoMachine = setup({
           actions: assign({
             error: (_, event) => event.data
           })
+        }
+      }
+    },
+    addingTodo: {
+      invoke: {
+        src: 'addTodo',
+        input: data => data.event.input,
+        onDone: {
+          target: 'fetchUserLoading'
         }
       }
     }

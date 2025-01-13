@@ -12,7 +12,7 @@ function App() {
 
   const handleAdd = () => {
     if (text.trim()) {
-      send({ type: 'ADD_TODO', text });
+      send({ type: 'ADD', input: text });
       setText('');
     }
   };
@@ -25,9 +25,8 @@ function App() {
     send({ type: 'DELETE_TODO', id: todoId });
   };
 
-  if (state.value === 'loading') return <p>Loading... {JSON.stringify(state.context.todos)}</p>;
-  if (state.value === 'error') return <p>Error: {state.context.error}</p>;
-
+  if (state.matches('fetchUserLoading')) return <p>Loading...</p>;
+  if (state.matches('error')) return <p>Error: {state.context.error}</p>;
   return (
     <>
       <Navigation />
