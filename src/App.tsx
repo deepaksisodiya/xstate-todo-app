@@ -1,7 +1,3 @@
-import Navigation from './Navigation';
-import { Outlet } from 'react-router-dom';
-import Logo from './assets/react.svg';
-import Todos from './modules/todos/Todos';
 import { useMachine } from '@xstate/react';
 import { todoMachine } from './machine/todoMachine';
 import { useState } from 'react';
@@ -29,9 +25,6 @@ function App() {
   if (state.matches('error')) return <p>Error: {state.context.error}</p>;
   return (
     <>
-      <Navigation />
-
-      {JSON.stringify(state.context.todos)}
       <div>
         <input type="text" value={text} onChange={e => setText(e.target.value)} placeholder="Add a todo" />
         <button onClick={handleAdd}>Add</button>
@@ -45,15 +38,6 @@ function App() {
           </li>
         ))}
       </ul>
-
-      <h2>API End Point: {JSON.stringify(import.meta.env.VITE_APP_API_URL)}</h2>
-      <Logo />
-      <h1>React Template</h1>
-      <div id="detail">
-        <Outlet />
-      </div>
-
-      <Todos />
     </>
   );
 }
