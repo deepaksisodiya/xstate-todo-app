@@ -18,11 +18,11 @@ function App() {
   };
 
   const onToggle = todoId => {
-    send({ type: 'TOGGLE_TODO', id: todoId });
+    send({ type: 'TOGGLE', id: todoId });
   };
 
   const onDelete = todoId => {
-    send({ type: 'DELETE_TODO', id: todoId });
+    send({ type: 'DELETE', id: todoId });
   };
 
   if (state.matches('fetchUserLoading')) return <p>Loading...</p>;

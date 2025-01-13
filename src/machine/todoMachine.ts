@@ -21,6 +21,22 @@ export const todoMachine = setup({
       });
       if (!response.ok) throw new Error('Failed to add todo');
       return response.json();
+    }),
+    deleteTodo: fromPromise(async event => {
+      const response = await fetch(`http://localhost:3000/todos/${event.input}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error('Failed to delete todo');
+      return response.json();
+    }),
+    toggleTodo: fromPromise(async event => {
+      const response = await fetch(`http://localhost:3000/todos/${event.input}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: true }) // Use true instead of event.completed
+      });
+      if (!response.ok) throw new Error('Failed to toggle todo');
+      return response.json();
     })
   }
 }).createMachine({
@@ -36,11 +52,11 @@ export const todoMachine = setup({
         ADD: {
           target: 'addingTodo'
         },
-        TOGGLE_TODO: {
-          actions: ['toggleTodo']
+        TOGGLE: {
+          target: 'toggleTodo'
         },
-        DELETE_TODO: {
-          actions: ['deleteTodo']
+        DELETE: {
+          target: 'deletingTodo'
         }
       }
     },
@@ -72,6 +88,24 @@ export const todoMachine = setup({
       invoke: {
         src: 'addTodo',
         input: data => data.event.input,
+        onDone: {
+          target: 'fetchUserLoading'
+        }
+      }
+    },
+    deletingTodo: {
+      invoke: {
+        src: 'deleteTodo',
+        input: data => data.event.id,
+        onDone: {
+          target: 'fetchUserLoading'
+        }
+      }
+    },
+    toggleTodo: {
+      invoke: {
+        src: 'toggleTodo',
+        input: data => data.event.id,
         onDone: {
           target: 'fetchUserLoading'
         }
